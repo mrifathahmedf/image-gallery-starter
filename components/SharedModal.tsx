@@ -1,218 +1,170 @@
-import {
-  ArrowDownTrayIcon,
-  ArrowTopRightOnSquareIcon,
-  ArrowUturnLeftIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-import { AnimatePresence, motion, MotionConfig } from "framer-motion";
-import Image from "next/image";
-import { useState } from "react";
-import { useSwipeable } from "react-swipeable";
-import { variants } from "../utils/animationVariants";
-import downloadPhoto from "../utils/downloadPhoto";
-import { range } from "../utils/range";
-import type { ImageProps, SharedModalProps } from "../utils/types";
-import Twitter from "./Icons/Twitter";
 
-export default function SharedModal({
-  index,
-  images,
-  changePhotoId,
-  closeModal,
-  navigation,
-  currentPhoto,
-  direction,
-}: SharedModalProps) {
-  const [loaded, setLoaded] = useState(false);
+```jsx
+import { useState } from 'react';
 
-  let filteredImages = images?.filter((img: ImageProps) =>
-    range(index - 15, index + 15).includes(img.id),
-  );
+export default function App() {
+  const [activeTab, setActiveTab] = useState('repository');
 
-  const handlers = useSwipeable({
-    onSwipedLeft: () => {
-      if (index < images?.length - 1) {
-        changePhotoId(index + 1);
-      }
-    },
-    onSwipedRight: () => {
-      if (index > 0) {
-        changePhotoId(index - 1);
-      }
-    },
-    trackMouse: true,
-  });
-
-  let currentImage = images ? images[index] : currentPhoto;
-
-  return (
-    <MotionConfig
-      transition={{
-        x: { type: "spring", stiffness: 300, damping: 30 },
-        opacity: { duration: 0.2 },
-      }}
-    >
-      <div
-        className="relative z-50 flex aspect-[3/2] w-full max-w-7xl items-center wide:h-full xl:taller-than-854:h-auto"
-        {...handlers}
-      >
-        {/* Main image */}
-        <div className="w-full overflow-hidden">
-          <div className="relative flex aspect-[3/2] items-center justify-center">
-            <AnimatePresence initial={false} custom={direction}>
-              <motion.div
-                key={index}
-                custom={direction}
-                variants={variants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="absolute"
-              >
-                <Image
-                  src={`https://res.cloudinary.com/${
-                    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-                  }/image/upload/c_scale,${navigation ? "w_1280" : "w_1920"}/${
-                    currentImage.public_id
-                  }.${currentImage.format}`}
-                  width={navigation ? 1280 : 1920}
-                  height={navigation ? 853 : 1280}
-                  priority
-                  alt="Next.js Conf image"
-                  onLoad={() => setLoaded(true)}
-                />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Buttons + bottom nav bar */}
-        <div className="absolute inset-0 mx-auto flex max-w-7xl items-center justify-center">
-          {/* Buttons */}
-          {loaded && (
-            <div className="relative aspect-[3/2] max-h-full w-full">
-              {navigation && (
-                <>
-                  {index > 0 && (
-                    <button
-                      className="absolute left-3 top-[calc(50%-16px)] rounded-full bg-black/50 p-3 text-white/75 backdrop-blur-lg transition hover:bg-black/75 hover:text-white focus:outline-none"
-                      style={{ transform: "translate3d(0, 0, 0)" }}
-                      onClick={() => changePhotoId(index - 1)}
-                    >
-                      <ChevronLeftIcon className="h-6 w-6" />
-                    </button>
-                  )}
-                  {index + 1 < images.length && (
-                    <button
-                      className="absolute right-3 top-[calc(50%-16px)] rounded-full bg-black/50 p-3 text-white/75 backdrop-blur-lg transition hover:bg-black/75 hover:text-white focus:outline-none"
-                      style={{ transform: "translate3d(0, 0, 0)" }}
-                      onClick={() => changePhotoId(index + 1)}
-                    >
-                      <ChevronRightIcon className="h-6 w-6" />
-                    </button>
-                  )}
-                </>
-              )}
-              <div className="absolute top-0 right-0 flex items-center gap-2 p-3 text-white">
-                {navigation ? (
-                  <a
-                    href={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${currentImage.public_id}.${currentImage.format}`}
-                    className="rounded-full bg-black/50 p-2 text-white/75 backdrop-blur-lg transition hover:bg-black/75 hover:text-white"
-                    target="_blank"
-                    title="Open fullsize version"
-                    rel="noreferrer"
-                  >
-                    <ArrowTopRightOnSquareIcon className="h-5 w-5" />
-                  </a>
-                ) : (
-                  <a
-                    href={`https://twitter.com/intent/tweet?text=Check%20out%20this%20pic%20from%20Next.js%20Conf!%0A%0Ahttps://nextjsconf-pics.vercel.app/p/${index}`}
-                    className="rounded-full bg-black/50 p-2 text-white/75 backdrop-blur-lg transition hover:bg-black/75 hover:text-white"
-                    target="_blank"
-                    title="Open fullsize version"
-                    rel="noreferrer"
-                  >
-                    <Twitter className="h-5 w-5" />
-                  </a>
-                )}
-                <button
-                  onClick={() =>
-                    downloadPhoto(
-                      `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${currentImage.public_id}.${currentImage.format}`,
-                      `${index}.jpg`,
-                    )
-                  }
-                  className="rounded-full bg-black/50 p-2 text-white/75 backdrop-blur-lg transition hover:bg-black/75 hover:text-white"
-                  title="Download fullsize version"
-                >
-                  <ArrowDownTrayIcon className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="absolute top-0 left-0 flex items-center gap-2 p-3 text-white">
-                <button
-                  onClick={() => closeModal()}
-                  className="rounded-full bg-black/50 p-2 text-white/75 backdrop-blur-lg transition hover:bg-black/75 hover:text-white"
-                >
-                  {navigation ? (
-                    <XMarkIcon className="h-5 w-5" />
-                  ) : (
-                    <ArrowUturnLeftIcon className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
-          {/* Bottom Nav bar */}
-          {navigation && (
-            <div className="fixed inset-x-0 bottom-0 z-40 overflow-hidden bg-gradient-to-b from-black/0 to-black/60">
-              <motion.div
-                initial={false}
-                className="mx-auto mt-6 mb-6 flex aspect-[3/2] h-14"
-              >
-                <AnimatePresence initial={false}>
-                  {filteredImages.map(({ public_id, format, id }) => (
-                    <motion.button
-                      initial={{
-                        width: "0%",
-                        x: `${Math.max((index - 1) * -100, 15 * -100)}%`,
-                      }}
-                      animate={{
-                        scale: id === index ? 1.25 : 1,
-                        width: "100%",
-                        x: `${Math.max(index * -100, 15 * -100)}%`,
-                      }}
-                      exit={{ width: "0%" }}
-                      onClick={() => changePhotoId(id)}
-                      key={id}
-                      className={`${
-                        id === index
-                          ? "z-20 rounded-md shadow shadow-black/50"
-                          : "z-10"
-                      } ${id === 0 ? "rounded-l-md" : ""} ${
-                        id === images.length - 1 ? "rounded-r-md" : ""
-                      } relative inline-block w-full shrink-0 transform-gpu overflow-hidden focus:outline-none`}
-                    >
-                      <Image
-                        alt="small photos on the bottom"
-                        width={180}
-                        height={120}
-                        className={`${
-                          id === index
-                            ? "brightness-110 hover:brightness-110"
-                            : "brightness-50 contrast-125 hover:brightness-75"
-                        } h-full transform object-cover transition`}
-                        src={`https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/c_scale,w_180/${public_id}.${format}`}
-                      />
-                    </motion.button>
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            </div>
-          )}
+  const tabContent = {
+    repository: (
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-800">Repository Name (মূল ফোল্ডার)</h2>
+        <p className="text-gray-600">GitHub-এ যেটা মূল রেপোজিটরি হবে:</p>
+        <ul className="list-disc pl-6 space-y-1 text-gray-700">
+          <li>my-react-app</li>
+          <li>drawing-app-react</li>
+          <li>portfolio-site</li>
+          <li>react-todo-list</li>
+          <li>react-ai-chatbot</li>
+        </ul>
+        <p className="text-sm text-gray-500 mt-2">✅ নামকরণ টিপস: lowercase, ড্যাশ (-), স্পষ্টতা</p>
+      </div>
+    ),
+    components: (
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-800">Component Files</h2>
+        <p className="text-gray-600">React component ফাইলগুলো .jsx বা .tsx এক্সটেনশন দিয়ে:</p>
+        <ul className="list-disc pl-6 space-y-1 text-gray-700">
+          <li>Header.jsx</li>
+          <li>Navbar.jsx</li>
+          <li>DrawingCanvas.jsx</li>
+          <li>TodoItem.jsx</li>
+          <li>Footer.jsx</li>
+        </ul>
+        <p className="text-sm text-gray-500 mt-2">📌 নামকরণ কনভেনশন: PascalCase, প্রতিটি Component আলাদা ফাইলে</p>
+      </div>
+    ),
+    config: (
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-800">Config / Setup Files</h2>
+        <p className="text-gray-600">Root Level-এ থাকা গুরুত্বপূর্ণ ফাইলস:</p>
+        <ul className="list-disc pl-6 space-y-1 text-gray-700">
+          <li>package.json – প্রজেক্ট dependency</li>
+          <li>vite.config.js / webpack.config.js – bundler config</li>
+          <li>tailwind.config.js – Tailwind CSS সেটআপ</li>
+          <li>.gitignore – কোন ফাইল GitHub-এ যাবে না</li>
+          <li>README.md – প্রজেক্টের পরিচিতি</li>
+        </ul>
+      </div>
+    ),
+    structure: (
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-800">ফোল্ডার গঠন</h2>
+        <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto text-sm text-gray-800">
+{`my-react-app/
+├── public/
+│   └── index.html
+├── src/
+│   ├── components/
+│   │   ├── Header.jsx
+│   │   ├── Footer.jsx
+│   ├── pages/
+│   │   ├── Home.jsx
+│   ├── App.jsx
+│   └── main.jsx
+├── package.json
+├── README.md
+└── .gitignore`}
+        </pre>
+      </div>
+    ),
+    readme: (
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-800">README.md ফাইল</h2>
+        <p className="text-gray-600">প্রজেক্ট পরিচিতির জন্য সবচেয়ে গুরুত্বপূর্ণ। এই ফাইলে থাকা উচিত:</p>
+        <ul className="list-disc pl-6 space-y-1 text-gray-700">
+          <li>Project Title</li>
+          <li>Live Demo (যদি থাকে)</li>
+          <li>Installation Guide</li>
+          <li>Usage Instruction</li>
+          <li>Screenshots (optional)</li>
+          <li>Technologies Used</li>
+        </ul>
+      </div>
+    ),
+    tips: (
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-800">অতিরিক্ত টিপস</h2>
+        <ul className="list-disc pl-6 space-y-2 text-gray-700">
+          <li>ফাইল নাম কখনও বাংলায় দিও না</li>
+          <li>GitHub এ সব ফাইল Case-sensitive</li>
+          <li>শুরুতে প্রজেক্ট নাম ঠিক করো, তারপর ফাইলগুলো নাম দাও পরিষ্কারভাবে</li>
+          <li>প্রত্যেক Component কে আলাদা ফাইলে রাখো</li>
+        </ul>
+        <div className="mt-4">
+          <h3 className="font-medium text-gray-800">সংক্ষেপে:</h3>
+          <table className="w-full border-collapse mt-2 text-sm">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border px-4 py-2 text-left">ফাইল/ফোল্ডার</th>
+                <th className="border px-4 py-2 text-left">উদাহরণ নাম</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border px-4 py-2">Repository Name</td>
+                <td className="border px-4 py-2">drawing-app-react</td>
+              </tr>
+              <tr>
+                <td className="border px-4 py-2">Component Files</td>
+                <td className="border px-4 py-2">Header.jsx, CanvasBoard.jsx</td>
+              </tr>
+              <tr>
+                <td className="border px-4 py-2">Configuration</td>
+                <td className="border px-4 py-2">vite.config.js, tailwind.config.js</td>
+              </tr>
+              <tr>
+                <td className="border px-4 py-2">Entry Point</td>
+                <td className="border px-4 py-2">App.jsx, main.jsx</td>
+              </tr>
+              <tr>
+                <td className="border px-4 py-2">Documentation</td>
+                <td className="border px-4 py-2">README.md</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-    </MotionConfig>
+    ),
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="bg-indigo-600 px-6 py-4">
+          <h1 className="text-2xl font-bold text-white">React Project File & Folder Naming Guide</h1>
+        </div>
+        
+        <div className="border-b border-gray-200">
+          <nav className="flex overflow-x-auto" aria-label="Tabs">
+            {[
+              { id: 'repository', label: 'Repository' },
+              { id: 'components', label: 'Components' },
+              { id: 'config', label: 'Config' },
+              { id: 'structure', label: 'Structure' },
+              { id: 'readme', label: 'README' },
+              { id: 'tips', label: 'Tips & Summary' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`whitespace-nowrap py-4 px-6 text-sm font-medium ${
+                  activeTab === tab.id
+                    ? 'border-b-2 border-indigo-500 text-indigo-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        <div className="p-6">
+          {tabContent[activeTab]}
+        </div>
+      </div>
+    </div>
   );
 }
+```
